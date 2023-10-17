@@ -1,0 +1,76 @@
+const Admin = require("../models/Admin");
+
+const addAdmin=async (req,res,next)=>{
+    const{email,password} = req.body;
+    let existingAdmin;
+    try{
+        existingAdmin=await Admin.findOne({email});
+    }catch(err){
+        return console.error(err)
+    }
+    if(existingAdmin){
+        return res.status(400).json({message:"Admin already exists"});
+    }
+    let admin;
+    const hashedPassword=bycrypt.hashedSync(password);
+    try{
+        admin=new Admin({email,password:hashedPassword});
+        admin=await admin.save();
+    }catch(err){
+        return console.log(err);
+
+    }
+    if(!admin){
+        return res.status(400).json({message:"Unable toaccess admin"});
+
+    }
+    return res.status(201).json({message:"Admin created",admin:admin});
+}
+
+const adminLogin=async(re,res,next)=>{
+    const {email,password}=req.body;
+    if(
+        !email && email.trim()==="" &&
+        !password && password.trim()===""
+    ){
+        return res.status(401).json({message:"Invalid Inputs"});
+
+    }
+    let existingAdmin;
+    try{
+        existingAdmin=await Admin.findOne({email})
+    }catch(err){
+        return console.log(err);
+    }
+    if(!existingAdmin){
+        return res.status(401).json({message:"Admin not found"});
+    }
+    const isPasswordCorrect=bycrypt.compareSync(password,existingAdmin)
+}
+
+const getAdmins=async(req,res)=>{
+    let admins;
+    try{
+        admins=await Admin.findById();
+    }catch(e){
+        return res.send(e.message);
+    }
+    if(!admins){
+        return res.status(400).json({message:"cannot get Admin"});
+    }
+    return res.status(200).json({admins});
+}
+
+const getAdminByID=async(req,res,next)=>{
+    const id=req.params.id;
+    let admin;
+    try{
+        admin=await Admin.findById(id).populate("addedMovies");
+
+    }catch(err){
+        return console.log("cannot find admin");
+    }
+    return res.status(200).json({    admin})
+};
+
+module.exports={addAdmin,adminLogin,getAdmins,getAdminByID}
