@@ -1,3 +1,4 @@
+// this is to work with pull changes
 const Admin = require("../models/Admin");
 
 const addAdmin=async (req,res,next)=>{
